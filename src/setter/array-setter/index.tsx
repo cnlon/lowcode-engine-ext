@@ -16,12 +16,16 @@ interface ArraySetterState {
 
 /**
  * onItemChange 用于 ArraySetter 的单个 index 下的数据发生变化，
- * 因此 target.path 的数据格式必定为 [propName1, propName2, arrayIndex, key?]。
+ * 因此 target.path 的数据格式必定为 [propName, arrayIndex, key?]。
  *
  * @param target
  * @param value
  */
-function onItemChange (target: IPublicModelSettingField, index: number, item: IPublicModelSettingField, props: ArraySetterProps) {
+function onItemChange(
+  target: IPublicModelSettingField,
+  item: IPublicModelSettingField,
+  props: ArraySetterProps,
+) {
   const targetPath: Array<string | number> = target?.path;
   if (!targetPath || targetPath.length < 2) {
     console.warn(
@@ -41,7 +45,8 @@ function onItemChange (target: IPublicModelSettingField, index: number, item: IP
   }
   try {
     const fieldValue = field.getValue();
-    fieldValue[index] = item.getValue();
+    const arrayIndex = target?.path[1];
+    fieldValue[arrayIndex] = item.getValue();
     field?.setValue(fieldValue);
   } catch (e) {
     console.warn('[ArraySetter] extraProps.setValue failed :', e);
@@ -86,7 +91,7 @@ export class ListSetter extends Component<ArraySetterProps, ArraySetterState> {
           extraProps: {
             defaultValue: value[i],
             setValue: (target: IPublicModelSettingField) => {
-              onItemChange(target, i, item, props);
+              onItemChange(target, item, props);
             },
           },
         });
